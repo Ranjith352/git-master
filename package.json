@@ -1,8 +1,8 @@
 {
-  "name": "ci-quality-gate",
+  "name": "ci-demo",
   "version": "1.0.0",
   "scripts": {
-    "test": "mocha --reporter mocha-junit-reporter"
+    "test": "npx mocha test/*.js --reporter mocha-junit-reporter --reporter-options mochaFile=test-results.xml"
   },
   "devDependencies": {
     "mocha": "^10.0.0",
