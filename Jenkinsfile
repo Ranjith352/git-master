@@ -3,15 +3,12 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git 'git@github.com:Ranjith352/git-master.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh '''
+                echo "Installing dependencies..."
+                npm install
+
                 echo "Building Application..."
                 rm -rf build
                 mkdir build
@@ -23,7 +20,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                npm install
+                echo "Running Unit Tests..."
                 npm test
                 '''
             }
@@ -32,7 +29,7 @@ pipeline {
 
     post {
         always {
-            junit 'test-results.xml'
+            junit '**/test-results.xml'
             archiveArtifacts artifacts: 'build/output.txt'
         }
     }
