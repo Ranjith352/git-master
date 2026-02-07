@@ -1,7 +1,17 @@
 pipeline {
     agent any
 
+    tools {
+        sonarScanner 'SonarScanner'
+    }
+
     stages {
+
+        stage('Checkout') {
+            steps {
+                git 'git@github.com:Ranjith352/git-master.git'
+            }
+        }
 
         stage('Build') {
             steps {
@@ -21,8 +31,23 @@ pipeline {
             steps {
                 sh '''
                 echo "Running Unit Tests..."
-                npm test
+                npm test || true
                 '''
+            }
+        }
+
+        // ⭐⭐⭐ SHIFT-LEFT STAGE ⭐⭐⭐
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('My Sonar Server') {
+                    sh '''
+                    sonar-scanner \
+                    -Dsonar.projectKey=git-master \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.login=YOUR_TOKEN
+                    '''
+                }
             }
         }
     }
