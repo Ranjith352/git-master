@@ -36,7 +36,7 @@ pipeline {
             }
         }
 
-        // ⭐⭐⭐ SHIFT-LEFT STAGE ⭐⭐⭐
+        // ⭐ SHIFT-LEFT STAGE
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('My Sonar Server') {
@@ -44,9 +44,17 @@ pipeline {
                     sonar-scanner \
                     -Dsonar.projectKey=git-master \
                     -Dsonar.sources=. \
-                    -Dsonar.host.url=http://localhost:9000 \
-                    -Dsonar.login=YOUR_TOKEN
+                    -Dsonar.sourceEncoding=UTF-8
                     '''
+                }
+            }
+        }
+
+        // ⭐ OPTIONAL BUT HIGHLY RECOMMENDED
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
