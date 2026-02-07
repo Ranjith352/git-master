@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarScanner 'SonarScanner'
-    }
-
     environment {
         NODE_ENV = 'development'
     }
@@ -13,8 +9,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Pull code from GitHub
-                git branch: 'main', url: 'git@github.com:Ranjith352/git-master.git'
+                // Use HTTPS to avoid SSH key issues
+                git branch: 'main', url: 'https://github.com/Ranjith352/git-master.git'
             }
         }
 
@@ -47,7 +43,7 @@ pipeline {
             }
         }
 
-        // ⭐⭐⭐ SHIFT-LEFT STAGE ⭐⭐⭐
+        // ✅ SHIFT LEFT IMPLEMENTATION
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('My Sonar Server') {
@@ -62,8 +58,8 @@ pipeline {
             }
         }
 
-        // ⭐ QUALITY GATE (VERY IMPORTANT FOR MARKS)
-        stage("Quality Gate") {
+        // ✅ QUALITY GATE
+        stage('Quality Gate') {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -74,16 +70,15 @@ pipeline {
 
     post {
         always {
-            junit '**/test-results.xml'
             archiveArtifacts artifacts: 'build/output.txt', fingerprint: true
         }
 
         success {
-            echo "✅ Pipeline executed successfully. SonarQube analysis completed."
+            echo "Pipeline executed successfully. SonarQube analysis completed."
         }
 
         failure {
-            echo "❌ Pipeline failed. Check logs for errors."
+            echo "Pipeline failed. Check console output."
         }
     }
 }
