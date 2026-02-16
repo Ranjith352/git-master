@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs "NodeJS"   // Make sure NodeJS tool is added in Jenkins
+    }
+
     environment {
         NODE_ENV = 'development'
     }
@@ -9,7 +13,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Use HTTPS to avoid SSH key issues
                 git branch: 'main', url: 'https://github.com/Ranjith352/git-master.git'
             }
         }
@@ -48,7 +51,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('My Sonar Server') {
                     sh '''
-                    sonar-scanner \
+                    $SONAR_SCANNER_HOME/bin/sonar-scanner \
                     -Dsonar.projectKey=git-master \
                     -Dsonar.projectName=git-master \
                     -Dsonar.sources=. \
@@ -58,10 +61,10 @@ pipeline {
             }
         }
 
-        // ✅ QUALITY GATE
+        // ✅ QUALITY GATE CHECK
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -69,16 +72,17 @@ pipeline {
     }
 
     post {
+
         always {
             archiveArtifacts artifacts: 'build/output.txt', fingerprint: true
         }
 
         success {
-            echo "Pipeline executed successfully. SonarQube analysis completed."
+            echo "✅ Pipeline executed successfully. SonarQube analysis completed."
         }
 
         failure {
-            echo "Pipeline failed. Check console output."
+            echo "❌ Pipeline failed. Check console output."
         }
     }
 }
