@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs "NodeJS"   // Make sure NodeJS tool is added in Jenkins
+        nodejs "NodeJS"   // Must match Global Tool name
     }
 
     environment {
@@ -46,22 +46,25 @@ pipeline {
             }
         }
 
-        // ✅ SHIFT LEFT IMPLEMENTATION
+        // ✅ SHIFT LEFT IMPLEMENTATION (FIXED)
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('My Sonar Server') {
-                    sh '''
-                    $SONAR_SCANNER_HOME/bin/sonar-scanner \
-                    -Dsonar.projectKey=git-master \
-                    -Dsonar.projectName=git-master \
-                    -Dsonar.sources=. \
-                    -Dsonar.sourceEncoding=UTF-8
-                    '''
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv('My Sonar Server') {
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=git-master \
+                        -Dsonar.projectName=git-master \
+                        -Dsonar.sources=. \
+                        -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
                 }
             }
         }
 
-        // ✅ QUALITY GATE CHECK
+        // ✅ QUALITY GATE
         stage('Quality Gate') {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
